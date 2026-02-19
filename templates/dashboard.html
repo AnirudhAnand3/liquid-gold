@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard — Liquid Gold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#F5D98A;--gold-dark:#8B6914;
+  --bg:#0A0A08;--bg2:#111109;--bg3:#1A1A14;
+  --surface:#181810;--surface2:#222218;--surface3:#2a2a20;
+  --border:rgba(201,168,76,.18);--border-h:rgba(201,168,76,.4);
+  --text:#E8E4D8;--muted:#8A8470;--dim:#5A5445;
+  --danger:#C0392B;--success:#27AE60;--info:#2980B9;--warn:#D4AC0D;
+  --radius:4px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;font-size:12px;display:flex}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:240px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;height:100vh;overflow-y:auto;flex-shrink:0;
+}
+.sb-logo{padding:1.3rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.sb-logo-text{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:var(--gold)}
+.sb-logo-text span{color:var(--muted);font-weight:300}
+
+.sb-user{padding:1rem 1.2rem;border-bottom:1px solid var(--border)}
+.sb-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--bg);margin-bottom:.5rem}
+.sb-name{font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-email{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.4rem}
+.tier-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(201,168,76,.1);border:1px solid var(--border);padding:2px 8px;border-radius:2px;font-size:9px;letter-spacing:.08em;color:var(--gold)}
+.xp-wrap{margin-top:.5rem}
+.xp-label{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-bottom:3px;letter-spacing:.05em}
+.xp-bar{height:3px;background:rgba(255,255,255,.06);border-radius:50px;overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));border-radius:50px;transition:.5s}
+
+.sb-section{padding:.6rem 1.2rem .2rem;font-size:9px;color:var(--dim);letter-spacing:.15em;text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;color:var(--muted);text-decoration:none;font-size:11px;cursor:pointer;transition:.15s;border-left:2px solid transparent;position:relative;user-select:none}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,.02)}
+.sb-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.04)}
+.sb-icon{width:16px;text-align:center;font-size:.95rem}
+.sb-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;min-width:16px;text-align:center}
+
+.sb-bottom{margin-top:auto;padding:1rem 1.2rem;border-top:1px solid var(--border)}
+.sb-bottom a{display:flex;align-items:center;gap:.5rem;color:var(--dim);font-size:11px;text-decoration:none;padding:.4rem 0;transition:.15s}
+.sb-bottom a:hover{color:var(--danger)}
+
+/* ── MAIN ── */
+.main{flex:1;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 2rem;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:rgba(10,10,8,.97);backdrop-filter:blur(8px);z-index:40;flex-shrink:0;
+}
+.topbar-left{display:flex;align-items:center;gap:1rem}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300}
+.topbar-right{display:flex;align-items:center;gap:.8rem}
+.streak-pill{display:flex;align-items:center;gap:4px;background:rgba(212,172,13,.08);border:1px solid rgba(212,172,13,.2);color:var(--warn);padding:3px 10px;border-radius:2px;font-size:10px;letter-spacing:.05em}
+.notif-btn{background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:.3rem;position:relative;transition:.15s}
+.notif-btn:hover{color:var(--text)}
+.notif-dot{position:absolute;top:2px;right:2px;width:6px;height:6px;background:var(--danger);border-radius:50%;border:1px solid var(--bg)}
+.acc-num{font-size:10px;color:var(--dim);letter-spacing:.08em}
+
+/* ── PANELS ── */
+.panel{display:none;padding:1.8rem 2rem;flex:1}
+.panel.active{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.3rem;margin-bottom:1rem}
+.card-title{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}
+
+/* ── STAT CARDS ── */
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;transition:.2s}
+.stat-card:hover{border-color:var(--border-h)}
+.stat-icon{font-size:1.2rem;margin-bottom:.5rem}
+.stat-lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;color:var(--text);margin:.2rem 0;line-height:1}
+.stat-sub{font-size:10px;color:var(--dim)}
+
+/* ── VIRTUAL CARD ── */
+.v-card{background:linear-gradient(135deg,#1a1a12,#111109);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:1.6rem;position:relative;overflow:hidden;max-width:340px}
+.v-card::before{content:'';position:absolute;top:-30%;right:-20%;width:200px;height:200px;background:radial-gradient(circle,rgba(201,168,76,.1),transparent 70%);pointer-events:none}
+.v-chip{width:34px;height:26px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:4px;margin-bottom:1.3rem;display:grid;place-items:center}
+.v-chip::before{content:'';width:22px;height:16px;border:1px solid rgba(255,255,255,.3);border-radius:2px}
+.v-lbl{font-size:9px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase}
+.v-bal{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--gold);margin:.1rem 0 1rem}
+.v-row{display:flex;justify-content:space-between;align-items:flex-end}
+.v-num{font-size:10px;color:var(--muted);letter-spacing:.15em}
+.v-tier{font-size:10px;color:var(--gold);font-weight:700;letter-spacing:.05em}
+.v-name{font-size:11px;color:rgba(232,228,216,.5);margin-top:.3rem}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:.8rem}
+.form-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:.3rem}
+.form-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.65rem .9rem;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;outline:none;transition:.15s}
+.form-input:focus{border-color:var(--border-h)}
+.form-input::placeholder{color:var(--dim)}
+select.form-input option{background:var(--surface2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.lookup-box{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);border-radius:var(--radius);padding:.5rem .8rem;margin-top:.3rem;font-size:11px;display:none}
+.lookup-box.show{display:block}
+
+/* ── BUTTONS ── */
+.btn{padding:.6rem 1.2rem;border-radius:var(--radius);font-size:11px;font-weight:700;border:none;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:.4rem;font-family:'Space Mono',monospace;letter-spacing:.05em}
+.btn-gold{background:var(--gold);color:var(--bg)}
+.btn-gold:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--border-h);color:var(--gold)}
+.btn-danger{background:rgba(192,57,43,.1);color:var(--danger);border:1px solid rgba(192,57,43,.2)}
+.btn-danger:hover{background:rgba(192,57,43,.2)}
+.btn-sm{padding:.35rem .8rem;font-size:10px}
+.btn-full{width:100%;justify-content:center}
+
+/* ── TRANSACTION ROWS ── */
+.txn-row{display:flex;align-items:center;gap:.8rem;padding:.75rem 0;border-bottom:1px solid rgba(201,168,76,.05)}
+.txn-row:last-child{border-bottom:none}
+.txn-ico{width:32px;height:32px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.txn-ico.in{background:rgba(39,174,96,.1)}
+.txn-ico.out{background:rgba(192,57,43,.1)}
+.txn-ico.save{background:rgba(41,128,185,.1)}
+.txn-info{flex:1;min-width:0}
+.txn-name{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-meta{font-size:10px;color:var(--dim);margin-top:1px}
+.txn-amt{font-family:'Cormorant Garamond',serif;font-size:1.1rem;white-space:nowrap}
+.txn-amt.in{color:var(--success)}
+.txn-amt.out{color:var(--danger)}
+.txn-ref{font-size:9px;color:var(--dim);font-family:monospace;text-align:right}
+
+/* ── PROGRESS ── */
+.prog-bar{height:5px;background:rgba(255,255,255,.05);border-radius:50px;overflow:hidden}
+.prog-fill{height:100%;border-radius:50px;transition:.5s}
+
+/* ── GOAL CARDS ── */
+.goal-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:.7rem;transition:.15s}
+.goal-card:hover{border-color:var(--border-h)}
+.goal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem}
+.goal-name{font-size:12px;font-weight:700}
+.goal-pct{font-size:11px;color:var(--gold);font-weight:700}
+
+/* ── NOTIFICATION ITEMS ── */
+.notif-row{display:flex;gap:.7rem;padding:.7rem 0;border-bottom:1px solid rgba(201,168,76,.05);cursor:pointer;transition:.1s}
+.notif-row:hover{background:rgba(255,255,255,.01);margin:0 -.5rem;padding:.7rem .5rem}
+.notif-dot-ind{width:5px;height:5px;border-radius:50%;background:var(--gold);margin-top:.4rem;flex-shrink:0;opacity:0}
+.notif-row.unread .notif-dot-ind{opacity:1}
+.notif-ico{width:28px;height:28px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.notif-ico.success{background:rgba(39,174,96,.1)}
+.notif-ico.warning{background:rgba(212,172,13,.1)}
+.notif-ico.info{background:rgba(41,128,185,.1)}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notif-msg{font-size:10px;color:var(--muted);margin-top:1px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.notif-time{font-size:9px;color:var(--dim);white-space:nowrap;margin-left:.3rem;margin-top:2px}
+
+/* ── LEADERBOARD ── */
+.lb-row{display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid rgba(201,168,76,.05)}
+.lb-rank{width:22px;text-align:center;font-size:12px;font-weight:700;color:var(--dim)}
+.lb-rank.top{color:var(--gold)}
+.lb-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bg);flex-shrink:0}
+.lb-info{flex:1}
+.lb-name{font-size:11px;font-weight:700}
+.lb-tier{font-size:9px;color:var(--dim)}
+.lb-xp{font-size:11px;color:var(--gold);font-weight:700}
+.me-tag{background:rgba(201,168,76,.1);color:var(--gold);padding:1px 5px;border-radius:2px;font-size:9px;margin-left:.3rem}
+
+/* ── CONTACT/SCHED ROWS ── */
+.contact-row{display:flex;align-items:center;gap:.7rem;padding:.65rem 0;border-bottom:1px solid rgba(201,168,76,.05)}
+.contact-av{width:30px;height:30px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0}
+.contact-info{flex:1}
+.contact-name{font-size:11px;font-weight:700}
+.contact-acc{font-size:9px;color:var(--dim);font-family:monospace}
+
+/* ── BILL CARDS ── */
+.bill-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;margin-bottom:.6rem}
+.bill-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
+.bill-title{font-size:11px;font-weight:700}
+.bill-status{font-size:9px;padding:2px 7px;border-radius:2px;font-weight:700;letter-spacing:.06em}
+.bill-status.paid{background:rgba(39,174,96,.1);color:var(--success)}
+.bill-status.pending{background:rgba(212,172,13,.1);color:var(--warn)}
+
+/* ── ACT LOG ── */
+.act-row{display:flex;align-items:center;gap:.7rem;padding:.5rem 0;border-bottom:1px solid rgba(201,168,76,.04);font-size:11px}
+.act-action{flex:1;color:var(--text);font-weight:700}
+.act-detail{color:var(--muted);font-size:10px}
+.act-time{color:var(--dim);font-size:9px;white-space:nowrap}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:.2rem;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--radius);padding:.2rem;margin-bottom:1.2rem}
+.tab-btn{flex:1;padding:.5rem;text-align:center;border-radius:2px;cursor:pointer;font-size:10px;font-weight:700;color:var(--dim);transition:.15s;border:none;background:none;font-family:'Space Mono',monospace;letter-spacing:.06em}
+.tab-btn.active{background:var(--surface3);color:var(--text)}
+
+/* ── BUDGET ── */
+.budget-row{display:flex;align-items:center;gap:.7rem;padding:.65rem;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.5rem;transition:.15s}
+.budget-row:hover{border-color:var(--border-h)}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.4rem}
+.toast{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.8rem 1rem;min-width:260px;max-width:340px;display:flex;align-items:flex-start;gap:.6rem;animation:tIn .25s ease;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.success{border-color:rgba(39,174,96,.3)}
+.toast.error{border-color:rgba(192,57,43,.3)}
+.toast.info{border-color:rgba(41,128,185,.3)}
+.toast-body{flex:1}
+.toast-title{font-size:11px;font-weight:700;margin-bottom:1px}
+.toast-msg{font-size:10px;color:var(--muted);line-height:1.4}
+@keyframes tIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(5px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1.8rem;width:min(460px,95vw);max-height:86vh;overflow-y:auto;animation:mIn .25s ease}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.modal-header h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:.15s}
+.modal-close:hover{background:rgba(255,255,255,.06);color:var(--text)}
+@keyframes mIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--dim)}
+.empty-icon{font-size:2.5rem;margin-bottom:.8rem;opacity:.35}
+.empty p{font-size:11px;line-height:1.6}
+
+/* ── CHART ── */
+.chart-wrap{position:relative;width:100%;height:180px}
+
+/* ── FEE INFO ── */
+.fee-box{background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.12);border-radius:var(--radius);padding:.6rem .9rem;margin-bottom:.8rem;font-size:11px;display:none}
+.fee-row{display:flex;justify-content:space-between;padding:2px 0}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.15);border-radius:50px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:800px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:60;transform:translateX(-100%);transition:.25s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .grid-4{grid-template-columns:1fr 1fr}
+}
+@media(max-width:540px){
+  .grid-2,.grid-3,.grid-4,.form-row{grid-template-columns:1fr}
+  .panel{padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-text">⬡ Liquid <span>Gold</span></div>
+  </div>
+
+  <div class="sb-user">
+    <div class="sb-avatar">{{ current_user.username[0].upper() }}</div>
+    <div class="sb-name">{{ current_user.username }}</div>
+    <div class="sb-email">{{ current_user.email }}</div>
+    <div class="tier-badge">
+      {% set t=current_user.tier %}
+      {{ '🥉' if t=='bronze' else ('🥈' if t=='silver' else ('🥇' if t=='gold' else ('💿' if t=='platinum' else '💎'))) }}
+      {{ t.title() }}
+    </div>
+    <div class="xp-wrap">
+      <div class="xp-label"><span>XP</span><span>{{ current_user.xp }}</span></div>
+      <div class="xp-bar"><div class="xp-fill" style="width:{{ [current_user.xp % 200 / 2.0, 100]|min }}%"></div></div>
+    </div>
+  </div>
+
+  <div class="sb-section">Main</div>
+  <div class="sb-item active" onclick="go('overview')"><span class="sb-icon">🏠</span>Overview</div>
+  <div class="sb-item" onclick="go('wallet')"><span class="sb-icon">💳</span>Wallet</div>
+  <div class="sb-item" onclick="go('transfer')"><span class="sb-icon">💸</span>Send Money</div>
+
+  <div class="sb-section">Finance</div>
+  <div class="sb-item" onclick="go('savings')"><span class="sb-icon">🏦</span>Savings Goals</div>
+  <div class="sb-item" onclick="go('budget')"><span class="sb-icon">💰</span>Budget</div>
+  <div class="sb-item" onclick="go('analytics')"><span class="sb-icon">📊</span>Analytics</div>
+
+  <div class="sb-section">Social</div>
+  <div class="sb-item" onclick="go('contacts')"><span class="sb-icon">👥</span>Contacts</div>
+  <div class="sb-item" onclick="go('split')"><span class="sb-icon">🧾</span>Split Bills</div>
+  <div class="sb-item" onclick="go('scheduled')"><span class="sb-icon">📅</span>Scheduled</div>
+
+  <div class="sb-section">Account</div>
+  <div class="sb-item" onclick="go('notifications')">
+    <span class="sb-icon">🔔</span>Notifications
+    {% if unread_count %}<span class="sb-badge">{{ unread_count }}</span>{% endif %}
+  </div>
+  <div class="sb-item" onclick="go('transactions')"><span class="sb-icon">📋</span>History</div>
+  <div class="sb-item" onclick="go('leaderboard')"><span class="sb-icon">🏆</span>Leaderboard</div>
+  <div class="sb-item" onclick="go('security')"><span class="sb-icon">🔐</span>Security Log</div>
+  <div class="sb-item" onclick="go('profile')"><span class="sb-icon">👤</span>Profile</div>
+
+  <div class="sb-bottom">
+    <a href="/logout">🚪 Sign Out</a>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button id="menuBtn" onclick="toggleSidebar()" style="display:none;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer">☰</button>
+      <div class="topbar-title" id="panelTitle">Overview</div>
+    </div>
+    <div class="topbar-right">
+      {% if current_user.streak and current_user.streak > 1 %}
+      <div class="streak-pill">🔥 {{ current_user.streak }}-day streak</div>
+      {% endif %}
+      <button class="notif-btn" onclick="go('notifications')">
+        🔔{% if unread_count %}<span class="notif-dot"></span>{% endif %}
+      </button>
+      <div class="acc-num">{{ current_user.account_number }}</div>
+    </div>
+  </div>
+
+  <!-- ══ OVERVIEW ══ -->
+  <div class="panel active" id="panel-overview">
+    <div class="grid-4" style="margin-bottom:1rem">
+      <div class="stat-card">
+        <div class="stat-icon">💳</div>
+        <div class="stat-lbl">Wallet Balance</div>
+        <div class="stat-val" id="balDisplay">₹{{ '{:,.2f}'.format(current_user.balance) }}</div>
+        <div class="stat-sub">Available</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏦</div>
+        <div class="stat-lbl">Savings</div>
+        <div class="stat-val">₹{{ '{:,.2f}'.format(current_user.savings_balance) }}</div>
+        <div class="stat-sub">{{ savings_goals|length }} goal{{ 's' if savings_goals|length != 1 }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📤</div>
+        <div class="stat-lbl">Total Sent</div>
+        <div class="stat-val">₹{{ '{:,.0f}'.format(current_user.total_sent) }}</div>
+        <div class="stat-sub">Lifetime</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-lbl">XP Points</div>
+        <div class="stat-val">{{ current_user.xp }}</div>
+        <div class="stat-sub">{{ current_user.tier.title() }} tier</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Recent Transactions <button class="btn btn-sm btn-outline" onclick="go('transactions')">View All</button></div>
+        {% if transactions %}
+          {% for t in transactions %}
+          {% set is_in = (t.receiver_id == current_user.id and t.type != 'savings') or t.type == 'deposit' %}
+          <div class="txn-row">
+            <div class="txn-ico {{ 'in' if is_in else ('save' if t.type=='savings' else 'out') }}">
+              {{ '📥' if is_in else ('🏦' if t.type=='savings' else '📤') }}
+            </div>
+            <div class="txn-info">
+              <div class="txn-name">
+                {% if t.type=='deposit' %}Deposit
+                {% elif t.type=='withdrawal' %}Withdrawal
+                {% elif t.type=='savings' %}Savings
+                {% elif t.type=='split' %}Split Bill
+                {% elif is_in %}From {{ t.sender.username if t.sender else 'System' }}
+                {% else %}To {{ t.receiver.username if t.receiver else '—' }}{% endif %}
+              </div>
+              <div class="txn-meta">{{ t.description or '' }} · {{ t.created_at.strftime('%b %d') if t.created_at else '' }}</div>
+            </div>
+            <div>
+              <div class="txn-amt {{ 'in' if is_in else 'out' }}">{{ '+' if is_in else '-' }}₹{{ '{:,.2f}'.format(t.amount) }}</div>
+              <div class="txn-ref">{{ t.reference or '' }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty"><div class="empty-icon">📭</div><p>No transactions yet. Make your first transfer!</p></div>
+        {% endif %}
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title">Savings Goals <button class="btn btn-sm btn-gold" onclick="openM('goalModal')">+ New</button></div>
+          {% if savings_goals %}
+            {% for g in savings_goals[:4] %}
+            {% set pct = [g.current / g.target * 100, 100]|min if g.target > 0 else 0 %}
+            <div class="goal-card">
+              <div class="goal-header">
+                <div class="goal-name">{{ g.emoji }} {{ g.name }}</div>
+                <div class="goal-pct">{{ '{:.0f}'.format(pct) }}%</div>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" style="width:{{ pct }}%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light))"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-top:4px">
+                <span>₹{{ '{:,.0f}'.format(g.current) }}</span><span>₹{{ '{:,.0f}'.format(g.target) }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty"><div class="empty-icon">🎯</div><p>No goals yet.</p></div>
+          {% endif %}
+        </div>
+
+        <div class="card">
+          <div class="card-title">7-Day Spending</div>
+          <div class="chart-wrap"><canvas id="weekChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    {% if budgets %}
+    <div class="card">
+      <div class="card-title">Monthly Budget <button class="btn btn-sm btn-outline" onclick="go('budget')">Manage</button></div>
+      <div class="grid-3">
+        {% for b in budgets %}
+        {% set pct = b.pct %}
+        <div style="padding:.5rem;border:1px solid var(--border);border-radius:var(--radius)">
+          <div style="display:flex;justify-content:space-between;margin-bottom:.3rem">
+            <span>{{ b.emoji }} {{ b.name }}</span>
+            <span style="color:{{ 'var(--danger)' if pct>90 else ('var(--warn)' if pct>70 else 'var(--dim)') }};font-size:10px">{{ '{:.0f}'.format(pct) }}%</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" style="width:{{ pct }}%;background:{{ b.color }}"></div></div>
+          <div style="font-size:9px;color:var(--dim);margin-top:2px">₹{{ '{:,.0f}'.format(b.spent) }} / ₹{{ '{:,.0f}'.format(b.monthly_limit) }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ══ WALLET ══ -->
+  <div class="panel" id="panel-wallet">
+    <div class="grid-2">
+      <div>
+        <div class="v-card" style="margin-bottom:1rem">
+          <div class="v-chip"></div>
+          <div class="v-lbl">Available Balance</div>
+          <div class="v-bal" id="vcBal">₹{{ '{:,.2f}'.format(current_user.balance) }}</div>
+          <div class="v-row">
+            <div>
+              <div class="v-num">{{ current_user.account_number[:2] }} ···· ···· {{ current_user.account_number[-4:] }}</div>
+              <div class="v-name">{{ current_user.username }}</div>
+            </div>
+            <div class="v-tier">{% set t=current_user.tier %}{{ '🥉' if t=='bronze' else ('🥈' if t=='silver' else ('🥇' if t=='gold' else ('💿' if t=='platinum' else '💎'))) }} {{ t.title() }}</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Account Details</div>
+          <div style="font-size:11px;line-height:2.2">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Account No.</span><code style="color:var(--gold)">{{ current_user.account_number }}</code></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Savings Balance</span><span>₹{{ '{:,.2f}'.format(current_user.savings_balance) }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Total Transactions</span><span>{{ current_user.total_txn_count }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Total Received</span><span style="color:var(--success)">₹{{ '{:,.2f}'.format(current_user.total_received) }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Total Sent</span><span style="color:var(--danger)">₹{{ '{:,.2f}'.format(current_user.total_sent) }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Member Since</span><span>{{ current_user.created_at.strftime('%b %d, %Y') if current_user.created_at else '—' }}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">Deposit Funds</div>
+          <div class="form-group"><label class="form-label">Amount (₹)</label><input class="form-input" type="number" id="depAmt" placeholder="1000" min="1"></div>
+          <div class="form-group"><label class="form-label">Method</label>
+            <select class="form-input" id="depMethod"><option>UPI</option><option>Card</option><option>Net Banking</option><option>NEFT</option></select></div>
+          <button class="btn btn-gold btn-full" onclick="doDeposit()">💰 Add Money</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Withdraw to Bank</div>
+          <div class="form-group"><label class="form-label">Amount (₹)</label><input class="form-input" type="number" id="wdrAmt" placeholder="500" min="1"></div>
+          <p style="font-size:10px;color:var(--dim);margin-bottom:.8rem">Credited to your bank account in 2–3 business days.</p>
+          <button class="btn btn-outline btn-full" onclick="doWithdraw()">🏦 Withdraw</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TRANSFER ══ -->
+  <div class="panel" id="panel-transfer">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Send Money</div>
+        <div class="form-group">
+          <label class="form-label">Recipient (Email or Account No.)</label>
+          <input class="form-input" id="trTo" placeholder="friend@email.com or LG12345678AB" oninput="lookup(this.value,'trLookup')">
+          <div class="lookup-box" id="trLookup"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Amount (₹)</label><input class="form-input" type="number" id="trAmt" placeholder="500" oninput="calcFee()"></div>
+          <div class="form-group"><label class="form-label">Category</label>
+            <select class="form-input" id="trCat">
+              <option>Food & Dining</option><option>Transport</option><option>Shopping</option>
+              <option>Entertainment</option><option>Health</option><option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Note (optional)</label><input class="form-input" id="trDesc" placeholder="Dinner, Rent..."></div>
+        <div class="fee-box" id="feeBox">
+          <div class="fee-row"><span style="color:var(--dim)">Amount</span><span id="feeAmt"></span></div>
+          <div class="fee-row"><span style="color:var(--dim)">Fee (0.1%)</span><span id="feeVal" style="color:var(--warn)"></span></div>
+          <div class="fee-row" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"><span style="font-weight:700">Total</span><span id="feeTotal" style="color:var(--gold);font-weight:700"></span></div>
+        </div>
+        <button class="btn btn-gold btn-full" onclick="doTransfer()">💸 Send Money</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Quick Send</div>
+        {% if contacts %}
+          {% for c in contacts[:6] %}
+          <div class="contact-row">
+            <div class="contact-av">{{ c.contact_user.username[0].upper() }}</div>
+            <div class="contact-info">
+              <div class="contact-name">{{ c.nickname or c.contact_user.username }}</div>
+              <div class="contact-acc">{{ c.contact_user.account_number }}</div>
+            </div>
+            <button class="btn btn-sm btn-gold" onclick="quickSend('{{ c.contact_user.account_number }}','{{ c.nickname or c.contact_user.username }}')">Send</button>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty"><div class="empty-icon">👥</div><p>Send to someone and they appear here for quick access.</p></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SAVINGS ══ -->
+  <div class="panel" id="panel-savings">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <div><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">Savings Goals</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:2px">Total saved: ₹{{ '{:,.2f}'.format(current_user.savings_balance) }}</div></div>
+      <button class="btn btn-gold" onclick="openM('goalModal')">+ New Goal</button>
+    </div>
+    {% if savings_goals %}
+      {% for g in savings_goals %}
+      {% set pct = [g.current / g.target * 100, 100]|min if g.target > 0 else 0 %}
+      <div class="card" style="margin-bottom:.8rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem">
+          <div><div style="font-size:1.4rem">{{ g.emoji }}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-top:.2rem">{{ g.name }}</div>
+            {% if g.deadline %}<div style="font-size:10px;color:var(--dim)">Deadline: {{ g.deadline }}</div>{% endif %}</div>
+          <div style="text-align:right">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold)">{{ '{:.0f}'.format(pct) }}%</div>
+            <div style="font-size:10px;color:var(--dim)">{{ '🎉 Complete!' if pct>=100 else '₹{:,.0f} to go'.format(g.target - g.current) }}</div>
+          </div>
+        </div>
+        <div class="prog-bar" style="height:7px;margin-bottom:.4rem">
+          <div class="prog-fill" style="width:{{ pct }}%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light))"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:.8rem">
+          <span>₹{{ '{:,.0f}'.format(g.current) }} saved</span><span>₹{{ '{:,.0f}'.format(g.target) }} target</span>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn btn-sm btn-gold" onclick="openSavDep({{ g.id }},'{{ g.name }}',{{ g.current }},{{ g.target }})">+ Deposit</button>
+          <button class="btn btn-sm btn-outline" onclick="openSavWdr({{ g.id }},'{{ g.name }}',{{ g.current }})">Withdraw</button>
+          <button class="btn btn-sm btn-danger" onclick="delGoal({{ g.id }})">Delete</button>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty"><div class="empty-icon">🎯</div><p>No savings goals yet.<br>Create your first goal and start building your future!</p></div>
+    {% endif %}
+  </div>
+
+  <!-- ══ ANALYTICS ══ -->
+  <div class="panel" id="panel-analytics">
+    <div class="grid-2" style="margin-bottom:1rem">
+      <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-lbl">Total Received</div><div class="stat-val">₹{{ '{:,.0f}'.format(current_user.total_received) }}</div><div class="stat-sub">All time</div></div>
+      <div class="stat-card"><div class="stat-icon">📤</div><div class="stat-lbl">Total Sent</div><div class="stat-val">₹{{ '{:,.0f}'.format(current_user.total_sent) }}</div><div class="stat-sub">All time</div></div>
+    </div>
+    <div class="card"><div class="card-title">30-Day Overview</div><div class="chart-wrap" style="height:220px"><canvas id="analyticsChart"></canvas></div></div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title">Category Breakdown (This Month)</div><div class="chart-wrap" style="height:200px"><canvas id="catChart"></canvas></div></div>
+      <div class="card">
+        <div class="card-title">Category Totals</div>
+        <div id="catList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONTACTS ══ -->
+  <div class="panel" id="panel-contacts">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">Contacts</div>
+      <button class="btn btn-gold" onclick="openM('contactModal')">+ Add Contact</button>
+    </div>
+    <div class="card">
+      {% if contacts %}
+        {% for c in contacts %}
+        <div class="contact-row" id="cr-{{ c.id }}">
+          <div class="contact-av">{{ c.contact_user.username[0].upper() }}</div>
+          <div class="contact-info">
+            <div class="contact-name">{{ c.nickname or c.contact_user.username }}{% if c.nickname %} <span style="color:var(--dim);font-size:9px">({{ c.contact_user.username }})</span>{% endif %}</div>
+            <div class="contact-acc">{{ c.contact_user.account_number }} · {{ c.contact_user.tier.title() }}</div>
+          </div>
+          <div style="display:flex;gap:.4rem">
+            <button class="btn btn-sm btn-gold" onclick="quickSend('{{ c.contact_user.account_number }}','{{ c.nickname or c.contact_user.username }}')">Send</button>
+            <button class="btn btn-sm btn-danger" onclick="delContact({{ c.id }})">✕</button>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty"><div class="empty-icon">👥</div><p>No contacts yet. Add people you send to often.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ══ SPLIT BILLS ══ -->
+  <div class="panel" id="panel-split">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">Split Bills</div>
+      <button class="btn btn-gold" onclick="openM('splitModal')">+ Create Split</button>
+    </div>
+    <div class="card">
+      {% if bills %}
+        {% for m in bills %}
+        <div class="bill-card" id="bill-{{ m.bill_id }}">
+          <div class="bill-header">
+            <div class="bill-title">🧾 {{ m.bill.title }}</div>
+            <div class="bill-status {{ 'paid' if m.paid else 'pending' }}">{{ 'PAID' if m.paid else 'PENDING' }}</div>
+          </div>
+          <div style="font-size:10px;color:var(--dim);margin-bottom:.5rem">By {{ m.bill.creator.username }} · {{ m.bill.created_at.strftime('%b %d') if m.bill.created_at else '' }}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:11px">You owe: <strong style="color:var(--warn)">₹{{ '{:,.2f}'.format(m.amount_owed) }}</strong></div>
+              <div style="font-size:10px;color:var(--dim)">Total bill: ₹{{ '{:,.2f}'.format(m.bill.total_amount) }}</div>
+            </div>
+            {% if not m.paid %}
+            <button class="btn btn-sm btn-gold" onclick="payBill({{ m.bill_id }})">Pay Now</button>
+            {% else %}
+            <span style="color:var(--success);font-size:11px">✓ Paid</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty"><div class="empty-icon">🧾</div><p>No split bills yet. Create one to split expenses with friends!</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ══ SCHEDULED ══ -->
+  <div class="panel" id="panel-scheduled">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">Scheduled Payments</div>
+      <button class="btn btn-gold" onclick="openM('schedModal')">+ Schedule</button>
+    </div>
+    <div class="card">
+      {% if scheduled %}
+        {% for s in scheduled %}
+        <div class="contact-row" id="sched-{{ s.id }}">
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;margin-bottom:2px">To {{ s.receiver_user.username }}</div>
+            <div style="font-size:10px;color:var(--dim)">{{ s.description or 'Recurring payment' }}</div>
+            <div style="display:flex;gap:.5rem;align-items:center;margin-top:.3rem">
+              <span style="background:rgba(41,128,185,.1);color:var(--info);padding:1px 7px;border-radius:2px;font-size:9px;letter-spacing:.06em;text-transform:capitalize">{{ s.frequency }}</span>
+              <span style="font-size:10px;color:var(--dim)">Next: {{ s.next_date }}</span>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold)">₹{{ '{:,.2f}'.format(s.amount) }}</div>
+            <button class="btn btn-sm btn-danger" style="margin-top:.3rem" onclick="cancelSched({{ s.id }})">Cancel</button>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty"><div class="empty-icon">📅</div><p>No scheduled payments. Automate recurring transfers here.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ══ NOTIFICATIONS ══ -->
+  <div class="panel" id="panel-notifications">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">Notifications</div>
+      {% if unread_count %}<button class="btn btn-sm btn-outline" onclick="markRead()">Mark All Read</button>{% endif %}
+    </div>
+    <div class="card">
+      {% if notifications %}
+        {% for n in notifications %}
+        <div class="notif-row {{ 'unread' if not n.is_read }}">
+          <div class="notif-dot-ind"></div>
+          <div class="notif-ico {{ n.type }}">{{ '✅' if n.type=='success' else ('⚠️' if n.type=='warning' else ('ℹ️' if n.type=='info' else '❌')) }}</div>
+          <div class="notif-body">
+            <div class="notif-title">{{ n.title }}</div>
+            <div class="notif-msg">{{ n.message }}</div>
+          </div>
+          <div class="notif-time">{{ n.created_at.strftime('%b %d') if n.created_at else '' }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty"><div class="empty-icon">🔔</div><p>All caught up! No notifications.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ══ TRANSACTIONS ══ -->
+  <div class="panel" id="panel-transactions">
+    <div style="margin-bottom:1.2rem;font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">Transaction History</div>
+    <div class="card">
+      {% if transactions %}
+        {% for t in transactions %}
+        {% set is_in = (t.receiver_id == current_user.id and t.type != 'savings') or t.type == 'deposit' %}
+        <div class="txn-row">
+          <div class="txn-ico {{ 'in' if is_in else ('save' if t.type=='savings' else 'out') }}">
+            {{ '📥' if is_in else ('🏦' if t.type=='savings' else '📤') }}
+          </div>
+          <div class="txn-info">
+            <div class="txn-name">{% if t.type=='deposit' %}Deposit{% elif t.type=='withdrawal' %}Withdrawal{% elif t.type=='savings' %}Savings{% elif t.type=='split' %}{{ t.description }}{% elif is_in %}From {{ t.sender.username if t.sender else 'System' }}{% else %}To {{ t.receiver.username if t.receiver else '—' }}{% endif %}</div>
+            <div class="txn-meta">{{ t.description or '' }} · {{ t.created_at.strftime('%b %d, %H:%M') if t.created_at else '' }}{% if t.fee %} · Fee: ₹{{ t.fee }}{% endif %}</div>
+          </div>
+          <div>
+            <div class="txn-amt {{ 'in' if is_in else 'out' }}">{{ '+' if is_in else '-' }}₹{{ '{:,.2f}'.format(t.amount) }}</div>
+            <div class="txn-ref">{{ t.reference or '' }}</div>
+            {% if t.category and t.category != 'other' %}
+            <div style="font-size:9px;color:var(--dim);text-align:right;margin-top:1px">{{ t.category }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+        <div style="text-align:center;margin-top:1rem">
+          <button class="btn btn-outline btn-sm" onclick="loadMoreTxns()">Load More</button>
+        </div>
+      {% else %}
+        <div class="empty"><div class="empty-icon">📋</div><p>No transactions yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ══ BUDGET ══ -->
+  <div class="panel" id="panel-budget">
+    <div style="margin-bottom:1.2rem"><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">Budget Manager</div>
+      <div style="font-size:10px;color:var(--dim);margin-top:2px">Set monthly limits for each spending category</div></div>
+    {% if budgets %}
+    <div class="grid-2">
+      {% for b in budgets %}
+      {% set pct = b.pct %}
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem">
+          <span style="font-size:1.5rem">{{ b.emoji }}</span>
+          <div style="flex:1"><div style="font-size:11px;font-weight:700">{{ b.name }}</div>
+            <div style="font-size:10px;color:var(--dim)">₹{{ '{:,.0f}'.format(b.spent) }} spent this month</div></div>
+          <span style="font-size:1rem;font-weight:700;color:{{ 'var(--danger)' if pct>90 else ('var(--warn)' if pct>70 else 'var(--success)') }}">{{ '{:.0f}'.format(pct) }}%</span>
+        </div>
+        <div class="prog-bar" style="height:6px;margin-bottom:.8rem"><div class="prog-fill" style="width:{{ pct }}%;background:{{ b.color }}"></div></div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:10px;color:var(--dim);flex:1">Limit (₹):</span>
+          <input type="number" class="form-input" style="width:110px;padding:.4rem .6rem;font-size:11px" id="bgt-{{ b.id }}" value="{{ b.monthly_limit|int }}" min="0">
+          <button class="btn btn-sm btn-gold" onclick="updBudget({{ b.id }})">Save</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ══ LEADERBOARD ══ -->
+  <div class="panel" id="panel-leaderboard">
+    <div style="margin-bottom:1.2rem"><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">🏆 XP Leaderboard</div>
+      <div style="font-size:10px;color:var(--dim);margin-top:2px">{{ total_users }} member{{ 's' if total_users!=1 }}</div></div>
+    <div class="card">
+      {% for l in leaderboard %}
+      {% set i=loop.index0 %}
+      <div class="lb-row">
+        <div class="lb-rank {{ 'top' if i<3 }}">{{ '🥇' if i==0 else ('🥈' if i==1 else ('🥉' if i==2 else i+1)) }}</div>
+        <div class="lb-av">{{ l.username[0].upper() }}</div>
+        <div class="lb-info">
+          <div class="lb-name">{{ l.username }}{% if l.id==current_user.id %}<span class="me-tag">YOU</span>{% endif %}</div>
+          <div class="lb-tier">{{ l.tier.title() }}</div>
+        </div>
+        <div class="lb-xp">{{ l.xp }} XP</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="card">
+      <div class="card-title">How to Earn XP</div>
+      <div style="font-size:11px;line-height:2.4">
+        {% for row in [('🎉 Create Account',100),('💸 Send Transfer',15),('💰 Make Deposit',5),('🎯 Create Goal',20),('🏦 Deposit to Goal',10),('🏆 Complete Goal',100),('🔥 Daily Login',10),('🔥 7-Day Streak',50)] %}
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,.05);padding-bottom:2px">
+          <span>{{ row[0] }}</span><span style="color:var(--gold);font-weight:700">+{{ row[1] }} XP</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECURITY ══ -->
+  <div class="panel" id="panel-security">
+    <div style="margin-bottom:1.2rem"><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">Security Log</div>
+      <div style="font-size:10px;color:var(--dim);margin-top:2px">All account activity recorded for your security</div></div>
+    <div class="card">
+      {% if activity %}
+        {% for a in activity %}
+        <div class="act-row">
+          <span class="act-action">{{ a.action }}</span>
+          <span class="act-detail">{{ a.details }}</span>
+          <span class="act-time">{{ a.created_at.strftime('%b %d, %H:%M') if a.created_at else '' }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty"><div class="empty-icon">🔐</div><p>No activity recorded yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ══ PROFILE ══ -->
+  <div class="panel" id="panel-profile">
+    <div style="margin-bottom:1.2rem;font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300">Profile Settings</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Edit Profile</div>
+        <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem">
+          <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--bg)">{{ current_user.username[0].upper() }}</div>
+          <div><div style="font-size:12px;font-weight:700">{{ current_user.username }}</div><div style="font-size:10px;color:var(--dim)">{{ current_user.email }}</div></div>
+        </div>
+        <div class="form-group"><label class="form-label">Display Name</label><input class="form-input" id="pName" value="{{ current_user.username }}"></div>
+        <div class="form-group"><label class="form-label">Bio</label><input class="form-input" id="pBio" value="{{ current_user.bio or '' }}" placeholder="A short bio..."></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="pPhone" value="{{ current_user.phone or '' }}" placeholder="+91 9876543210"></div>
+        <button class="btn btn-gold btn-full" onclick="updateProfile()">Save Changes</button>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">Account Stats</div>
+          <div style="font-size:11px;line-height:2.4">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Tier</span><span>{% set t=current_user.tier %}{{ '🥉' if t=='bronze' else ('🥈' if t=='silver' else ('🥇' if t=='gold' else ('💿' if t=='platinum' else '💎'))) }} {{ t.title() }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">XP</span><span style="color:var(--gold);font-weight:700">{{ current_user.xp }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Streak</span><span>🔥 {{ current_user.streak }} days</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Transactions</span><span>{{ current_user.total_txn_count }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">Account No.</span><code style="color:var(--gold)">{{ current_user.account_number }}</code></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--danger)">Danger Zone</div>
+          <p style="font-size:11px;color:var(--dim);margin-bottom:.8rem">Permanently delete your account and all data. This cannot be undone.</p>
+          <button class="btn btn-danger btn-full" onclick="confirmDel()">🗑️ Delete Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Create Goal -->
+<div class="modal-overlay" id="goalModal"><div class="modal-box">
+  <div class="modal-header"><h3>🎯 New Savings Goal</h3><button class="modal-close" onclick="closeM('goalModal')">✕</button></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Goal Name</label><input class="form-input" id="gName" placeholder="New laptop, Vacation..."></div>
+    <div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="gEmoji" placeholder="🎯" maxlength="2"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Target Amount (₹)</label><input class="form-input" type="number" id="gTarget" placeholder="50000"></div>
+  <div class="form-group"><label class="form-label">Deadline (optional)</label><input class="form-input" type="date" id="gDeadline"></div>
+  <div style="display:flex;gap:.6rem"><button class="btn btn-outline" style="flex:1" onclick="closeM('goalModal')">Cancel</button><button class="btn btn-gold" style="flex:1" onclick="createGoal()">Create Goal</button></div>
+</div></div>
+
+<!-- Savings Deposit -->
+<div class="modal-overlay" id="savDepModal"><div class="modal-box">
+  <div class="modal-header"><h3>🏦 Deposit to Savings</h3><button class="modal-close" onclick="closeM('savDepModal')">✕</button></div>
+  <input type="hidden" id="sdId"><p id="sdInfo" style="font-size:11px;color:var(--dim);margin-bottom:.8rem"></p>
+  <div class="form-group"><label class="form-label">Amount (₹)</label><input class="form-input" type="number" id="sdAmt" placeholder="1000"></div>
+  <div style="display:flex;gap:.6rem"><button class="btn btn-outline" style="flex:1" onclick="closeM('savDepModal')">Cancel</button><button class="btn btn-gold" style="flex:1" onclick="doSavDep()">Deposit</button></div>
+</div></div>
+
+<!-- Savings Withdraw -->
+<div class="modal-overlay" id="savWdrModal"><div class="modal-box">
+  <div class="modal-header"><h3>💸 Withdraw from Savings</h3><button class="modal-close" onclick="closeM('savWdrModal')">✕</button></div>
+  <input type="hidden" id="swId"><p id="swInfo" style="font-size:11px;color:var(--dim);margin-bottom:.8rem"></p>
+  <div class="form-group"><label class="form-label">Amount (₹)</label><input class="form-input" type="number" id="swAmt" placeholder="500"></div>
+  <div style="display:flex;gap:.6rem"><button class="btn btn-outline" style="flex:1" onclick="closeM('savWdrModal')">Cancel</button><button class="btn btn-gold" style="flex:1" onclick="doSavWdr()">Withdraw</button></div>
+</div></div>
+
+<!-- Add Contact -->
+<div class="modal-overlay" id="contactModal"><div class="modal-box">
+  <div class="modal-header"><h3>👥 Add Contact</h3><button class="modal-close" onclick="closeM('contactModal')">✕</button></div>
+  <div class="form-group"><label class="form-label">Email or Account Number</label>
+    <input class="form-input" id="cId" placeholder="friend@email.com or LG..." oninput="lookup(this.value,'cLookup')">
+    <div class="lookup-box" id="cLookup"></div></div>
+  <div class="form-group"><label class="form-label">Nickname (optional)</label><input class="form-input" id="cNick" placeholder="Bestie, Mom..."></div>
+  <div style="display:flex;gap:.6rem"><button class="btn btn-outline" style="flex:1" onclick="closeM('contactModal')">Cancel</button><button class="btn btn-gold" style="flex:1" onclick="addContact()">Add</button></div>
+</div></div>
+
+<!-- Create Split -->
+<div class="modal-overlay" id="splitModal"><div class="modal-box">
+  <div class="modal-header"><h3>🧾 Create Split Bill</h3><button class="modal-close" onclick="closeM('splitModal')">✕</button></div>
+  <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="spTitle" placeholder="Dinner, Trip, Rent..."></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Total Amount (₹)</label><input class="form-input" type="number" id="spTotal" placeholder="1200"></div>
+    <div class="form-group"><label class="form-label">Number of Members</label><input class="form-input" type="number" id="spCount" placeholder="3" min="1" max="10" oninput="buildMembers()"></div>
+  </div>
+  <div id="spMembers"></div>
+  <div style="display:flex;gap:.6rem;margin-top:.8rem"><button class="btn btn-outline" style="flex:1" onclick="closeM('splitModal')">Cancel</button><button class="btn btn-gold" style="flex:1" onclick="createSplit()">Create</button></div>
+</div></div>
+
+<!-- Schedule Payment -->
+<div class="modal-overlay" id="schedModal"><div class="modal-box">
+  <div class="modal-header"><h3>📅 Schedule Payment</h3><button class="modal-close" onclick="closeM('schedModal')">✕</button></div>
+  <div class="form-group"><label class="form-label">Recipient</label>
+    <input class="form-input" id="scTo" placeholder="Email or account no." oninput="lookup(this.value,'scLookup')">
+    <div class="lookup-box" id="scLookup"></div></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Amount (₹)</label><input class="form-input" type="number" id="scAmt" placeholder="500"></div>
+    <div class="form-group"><label class="form-label">Frequency</label>
+      <select class="form-input" id="scFreq"><option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="quarterly">Quarterly</option><option value="yearly">Yearly</option></select></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">First Date</label><input class="form-input" type="date" id="scDate"></div>
+    <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="scDesc" placeholder="Rent, Subscription..."></div>
+  </div>
+  <div style="display:flex;gap:.6rem"><button class="btn btn-outline" style="flex:1" onclick="closeM('schedModal')">Cancel</button><button class="btn btn-gold" style="flex:1" onclick="createSched()">Schedule</button></div>
+</div></div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ── Panel Navigation ──────────────────────────────────────────────────────────
+const TITLES = {
+  overview:'Overview',wallet:'Wallet',transfer:'Send Money',
+  savings:'Savings Goals',budget:'Budget',analytics:'Analytics',
+  contacts:'Contacts',split:'Split Bills',scheduled:'Scheduled',
+  notifications:'Notifications',transactions:'History',
+  leaderboard:'Leaderboard',security:'Security Log',profile:'Profile'
+};
+
+function go(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('active');
+  document.getElementById('panelTitle').textContent = TITLES[name] || name;
+  document.querySelectorAll('.sb-item').forEach(n => {
+    if (n.getAttribute('onclick') === `go('${name}')`) n.classList.add('active');
+  });
+  if (name === 'analytics') initAnalytics();
+  // close sidebar on mobile
+  if (window.innerWidth <= 800) document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+// Responsive menu button visibility
+function checkMenu() {
+  document.getElementById('menuBtn').style.display = window.innerWidth <= 800 ? 'block' : 'none';
+}
+checkMenu(); window.addEventListener('resize', checkMenu);
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(title, msg='', type='info') {
+  const icons={success:'✅',error:'❌',info:'ℹ️',warning:'⚠️'};
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type]||'ℹ️'}</span><div class="toast-body"><div class="toast-title">${title}</div>${msg?`<div class="toast-msg">${msg}</div>`:''}</div>`;
+  document.getElementById('toastWrap').appendChild(el);
+  setTimeout(()=>{ el.style.transition='.25s'; el.style.opacity='0'; setTimeout(()=>el.remove(),250); }, 4000);
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openM(id) { document.getElementById(id).classList.add('open'); }
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('keydown', e => e.key==='Escape' && document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open')));
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => e.target===o && o.classList.remove('open')));
+
+// ── Balance refresh ───────────────────────────────────────────────────────────
+async function refreshBal() {
+  try {
+    const r = await fetch('/api/balance'); const d = await r.json();
+    const fmt = v => '₹' + Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    ['balDisplay','vcBal'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=fmt(d.balance); });
+  } catch(e){}
+}
+
+// ── Fee Calc ──────────────────────────────────────────────────────────────────
+function calcFee() {
+  const amt = parseFloat(document.getElementById('trAmt').value)||0;
+  const box = document.getElementById('feeBox');
+  if (amt > 0) {
+    const fee = amt > 1000 ? amt * 0.001 : 0;
+    document.getElementById('feeAmt').textContent = '₹'+amt.toFixed(2);
+    document.getElementById('feeVal').textContent = '₹'+fee.toFixed(2);
+    document.getElementById('feeTotal').textContent = '₹'+(amt+fee).toFixed(2);
+    box.style.display = 'block';
+  } else { box.style.display = 'none'; }
+}
+
+// ── User Lookup ───────────────────────────────────────────────────────────────
+let ltimer;
+function lookup(val, targetId) {
+  clearTimeout(ltimer);
+  const el = document.getElementById(targetId);
+  if (val.length < 4) { el.classList.remove('show'); return; }
+  ltimer = setTimeout(async () => {
+    try {
+      const r = await fetch('/api/user/lookup?q=' + encodeURIComponent(val));
+      const d = await r.json();
+      if (d.error) { el.classList.remove('show'); return; }
+      el.innerHTML = `<strong>${d.username}</strong> <span style="color:var(--dim)">${d.account_number}</span> · <span style="color:var(--gold)">${d.tier} tier</span>`;
+      el.classList.add('show');
+    } catch(e) { el.classList.remove('show'); }
+  }, 400);
+}
+
+// ── Transfer ──────────────────────────────────────────────────────────────────
+async function doTransfer() {
+  const identifier = document.getElementById('trTo').value.trim();
+  const amount = parseFloat(document.getElementById('trAmt').value);
+  const description = document.getElementById('trDesc').value.trim();
+  const category = document.getElementById('trCat').value;
+  if (!identifier || !amount) { toast('Missing fields','Enter recipient and amount','error'); return; }
+  const r = await fetch('/api/transfer', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier,amount,description,category})});
+  const d = await r.json();
+  if (d.error) { toast('Transfer Failed', d.error, 'error'); return; }
+  toast('Transfer Successful!', `₹${amount} sent to ${d.receiver_name}. Ref: ${d.reference}`, 'success');
+  ['trTo','trAmt','trDesc'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('trLookup').classList.remove('show');
+  document.getElementById('feeBox').style.display='none';
+  refreshBal();
+}
+
+function quickSend(acc, name) {
+  document.getElementById('trTo').value = acc;
+  go('transfer');
+  document.getElementById('trTo').focus();
+  toast('Quick Send', `Sending to ${name}`, 'info');
+}
+
+// ── Deposit / Withdraw ────────────────────────────────────────────────────────
+async function doDeposit() {
+  const amount = parseFloat(document.getElementById('depAmt').value);
+  const method = document.getElementById('depMethod').value;
+  if (!amount) { toast('Enter amount','','error'); return; }
+  const r = await fetch('/api/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount,method})});
+  const d = await r.json();
+  if (d.error) { toast('Error', d.error, 'error'); return; }
+  toast('Deposit Successful!', `₹${amount} added to your wallet`, 'success');
+  document.getElementById('depAmt').value='';
+  refreshBal();
+}
+
+async function doWithdraw() {
+  const amount = parseFloat(document.getElementById('wdrAmt').value);
+  if (!amount) { toast('Enter amount','','error'); return; }
+  if (!confirm(`Withdraw ₹${amount} to your bank?`)) return;
+  const r = await fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount})});
+  const d = await r.json();
+  if (d.error) { toast('Error', d.error, 'error'); return; }
+  toast('Withdrawal Initiated!', `₹${amount} will reach your bank in 2-3 days`, 'success');
+  document.getElementById('wdrAmt').value='';
+  refreshBal();
+}
+
+// ── Savings ───────────────────────────────────────────────────────────────────
+async function createGoal() {
+  const name=document.getElementById('gName').value.trim();
+  const target=parseFloat(document.getElementById('gTarget').value);
+  const emoji=document.getElementById('gEmoji').value.trim()||'🎯';
+  const deadline=document.getElementById('gDeadline').value;
+  if (!name||!target) { toast('Fill required fields','','error'); return; }
+  const r=await fetch('/api/savings/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,target,emoji,deadline})});
+  const d=await r.json();
+  if (d.error) { toast('Error',d.error,'error'); return; }
+  toast('Goal Created!',`"${name}" — ₹${target.toLocaleString()} target`,'success');
+  closeM('goalModal');
+  setTimeout(()=>location.reload(),1500);
+}
+
+function openSavDep(id,name,cur,tgt) {
+  document.getElementById('sdId').value=id;
+  document.getElementById('sdInfo').textContent=`"${name}" — ₹${cur.toLocaleString()} / ₹${tgt.toLocaleString()}`;
+  document.getElementById('sdAmt').value='';
+  openM('savDepModal');
+}
+async function doSavDep() {
+  const goal_id=document.getElementById('sdId').value;
+  const amount=parseFloat(document.getElementById('sdAmt').value);
+  if (!amount) { toast('Enter amount','','error'); return; }
+  const r=await fetch('/api/savings/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal_id,amount})});
+  const d=await r.json();
+  if (d.error) { toast('Error',d.error,'error'); return; }
+  toast('Deposited!',`₹${amount} added to your goal`,'success');
+  closeM('savDepModal'); refreshBal();
+  setTimeout(()=>location.reload(),1500);
+}
+
+function openSavWdr(id,name,cur) {
+  document.getElementById('swId').value=id;
+  document.getElementById('swInfo').textContent=`"${name}" — Available: ₹${cur.toLocaleString()}`;
+  document.getElementById('swAmt').value='';
+  openM('savWdrModal');
+}
+async function doSavWdr() {
+  const goal_id=document.getElementById('swId').value;
+  const amount=parseFloat(document.getElementById('swAmt').value);
+  if (!amount) { toast('Enter amount','','error'); return; }
+  const r=await fetch('/api/savings/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal_id,amount})});
+  const d=await r.json();
+  if (d.error) { toast('Error',d.error,'error'); return; }
+  toast('Withdrawn!',`₹${amount} returned to wallet`,'success');
+  closeM('savWdrModal'); refreshBal();
+  setTimeout(()=>location.reload(),1500);
+}
+
+async function delGoal(id) {
+  if (!confirm('Delete this goal? Remaining savings returned to wallet.')) return;
+  const r=await fetch(`/api/savings/delete/${id}`,{method:'DELETE'});
+  const d=await r.json();
+  if (d.error) { toast('Error',d.error,'error'); return; }
+  toast('Goal deleted','Savings returned to wallet','info');
+  setTimeout(()=>location.reload(),1200);
+}
+
+// ── Contacts ──────────────────────────────────────────────────────────────────
+async function addContact() {
+  const identifier=document.getElementById('cId').value.trim();
+  const nickname=document.getElementById('cNick').value.trim();
+  if (!identifier) { toast('Enter email or account number','','error'); return; }
+  const r=await fetch('/api/contacts/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier,nickname})});
+  const d=await r.json();
+  if (d.error) { toast('Error',d.error,'error'); return; }
+  toast('Contact Added!',`${d.username} saved`,'success');
+  closeM('contactModal');
+  setTimeout(()=>location.reload(),1200);
+}
+
+async function delContact(id) {
+  if (!confirm('Remove this contact?')) return;
+  await fetch(`/api/contacts/delete/${id}`,{method:'DELETE'});
+  document.getElementById('cr-'+id)?.remove();
+  toast('Contact removed','','info');
+}
+
+// ── Scheduled ─────────────────────────────────────────────────────────────────
+async function createSched() {
+  const identifier=document.getElementById('scTo').value.trim();
+  const amount=parseFloat(document.getElementById('scAmt').value);
+  const frequency=document.getElementById('scFreq').value;
+  const next_date=document.getElementById('scDate').value;
+  const description=document.getElementById('scDesc').value.trim();
+  if (!identifier||!amount||!next_date) { toast('Fill all fields','','error'); return; }
+  const r=await fetch('/api/scheduled/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier,amount,frequency,next_date,description})});
+  const d=await r.json();
+  if (d.error) { toast('Error',d.error,'error'); return; }
+  toast('Payment Scheduled!',`₹${amount} ${frequency}`,'success');
+  closeM('schedModal');
+  setTimeout(()=>location.reload(),1200);
+}
+
+async function cancelSched(id) {
+  if (!confirm('Cancel this scheduled payment?')) return;
+  await fetch(`/api/scheduled/delete/${id}`,{method:'DELETE'});
+  document.getElementById('sched-'+id)?.remove();
+  toast('Cancelled','','info');
+}
+
+// ── Split Bills ───────────────────────────────────────────────────────────────
+function buildMembers() {
+  const count=parseInt(document.getElementById('spCount').value)||0;
+  const total=parseFloat(document.getElementById('spTotal').value)||0;
+  const per=(count>0?total/count:0).toFixed(2);
+  let html='';
+  for(let i=0;i<Math.min(count,10);i++) {
+    html+=`<div class="form-row" style="margin-bottom:.4rem">
+      <div class="form-group" style="margin-bottom:0"><input class="form-input" placeholder="Email/Acc #${i+1}" id="sm_id_${i}"></div>
+      <div class="form-group" style="margin-bottom:0"><input class="form-input" type="number" id="sm_amt_${i}" value="${per}" placeholder="₹${per}"></div>
+    </div>`;
+  }
+  document.getElementById('spMembers').innerHTML=html;
+}
+
+async function createSplit() {
+  const title=document.getElementById('spTitle').value.trim();
+  const total=parseFloat(document.getElementById('spTotal').value);
+  const count=parseInt(document.getElementById('spCount').value);
+  if (!title||!total||!count) { toast('Fill required fields','','error'); return; }
+  const members=[];
+  for(let i=0;i<count;i++) {
+    const identifier=document.getElementById(`sm_id_${i}`)?.value.trim();
+    const amount=parseFloat(document.getElementById(`sm_amt_${i}`)?.value);
+    if(identifier&&amount) members.push({identifier,amount});
+  }
+  if(!members.length) { toast('Add at least one member','','error'); return; }
+  const r=await fetch('/api/split/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,total_amount:total,members})});
+  const d=await r.json();
+  if(d.error) { toast('Error',d.error,'error'); return; }
+  toast('Split Created!','Members notified','success');
+  closeM('splitModal');
+  setTimeout(()=>location.reload(),1200);
+}
+
+async function payBill(bill_id) {
+  if (!confirm('Pay your share of this bill?')) return;
+  const r=await fetch(`/api/split/pay/${bill_id}`,{method:'POST'});
+  const d=await r.json();
+  if(d.error) { toast('Error',d.error,'error'); return; }
+  toast('Payment Sent!','Your share has been paid','success');
+  refreshBal();
+  setTimeout(()=>location.reload(),1200);
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+async function markRead() {
+  await fetch('/api/notifications/read',{method:'POST'});
+  document.querySelectorAll('.notif-row').forEach(n=>n.classList.remove('unread'));
+  document.querySelectorAll('.sb-badge,.notif-dot').forEach(b=>b.remove());
+  toast('All marked as read','','info');
+}
+
+// ── Budget ────────────────────────────────────────────────────────────────────
+async function updBudget(id) {
+  const limit=parseFloat(document.getElementById('bgt-'+id).value);
+  const r=await fetch('/api/budget/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,monthly_limit:limit})});
+  const d=await r.json();
+  if(d.success) toast('Budget Updated!','','success');
+}
+
+// ── Profile ───────────────────────────────────────────────────────────────────
+async function updateProfile() {
+  const username=document.getElementById('pName').value.trim();
+  const bio=document.getElementById('pBio').value.trim();
+  const phone=document.getElementById('pPhone').value.trim();
+  if(!username) { toast('Username required','','error'); return; }
+  const r=await fetch('/api/profile/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,bio,phone})});
+  const d=await r.json();
+  if(d.error) { toast('Error',d.error,'error'); return; }
+  toast('Profile Updated!','','success');
+}
+
+async function confirmDel() {
+  const input=prompt('Type DELETE to permanently delete your account:');
+  if(input!=='DELETE') return;
+  const r=await fetch('/api/account/delete',{method:'DELETE'});
+  const d=await r.json();
+  if(d.success) window.location.href='/';
+}
+
+// ── Load more txns ────────────────────────────────────────────────────────────
+let txnPage=1;
+async function loadMoreTxns() {
+  txnPage++;
+  const r=await fetch(`/api/transactions?page=${txnPage}`);
+  const txns=await r.json();
+  if(!txns.length) { toast('No more transactions','','info'); return; }
+  toast(`${txns.length} more loaded`,'','info');
+}
+
+// ── Charts ────────────────────────────────────────────────────────────────────
+Chart.defaults.color='#5A5445';
+Chart.defaults.borderColor='rgba(201,168,76,0.06)';
+
+const DAILY = {{ daily|tojson }};
+
+function initWeekChart() {
+  const ctx=document.getElementById('weekChart');
+  if(!ctx) return;
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:DAILY.map(d=>d.date),
+      datasets:[{label:'Spent',data:DAILY.map(d=>d.total),backgroundColor:'rgba(201,168,76,0.25)',borderColor:'#C9A84C',borderWidth:1.5,borderRadius:3}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(201,168,76,0.05)'},ticks:{callback:v=>'₹'+v}}}}
+  });
+}
+
+let analyticsReady=false;
+function initAnalytics() {
+  if(analyticsReady) return; analyticsReady=true;
+  fetch('/api/analytics').then(r=>r.json()).then(data=>{
+    const ctx=document.getElementById('analyticsChart');
+    if(ctx) new Chart(ctx,{
+      type:'line',
+      data:{labels:data.daily.map(d=>d.date),datasets:[
+        {label:'Spent',data:data.daily.map(d=>d.spent),borderColor:'#C0392B',backgroundColor:'rgba(192,57,43,0.07)',tension:0.4,fill:true,pointRadius:2},
+        {label:'Received',data:data.daily.map(d=>d.received),borderColor:'#27AE60',backgroundColor:'rgba(39,174,96,0.07)',tension:0.4,fill:true,pointRadius:2}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:10}}},
+        scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8}},y:{grid:{color:'rgba(201,168,76,0.05)'},ticks:{callback:v=>'₹'+v}}}}
+    });
+
+    const catCtx=document.getElementById('catChart');
+    if(catCtx&&data.categories.length) {
+      const colors=['#C9A84C','#C0392B','#2980B9','#27AE60','#8E44AD','#D4AC0D','#1ABC9C'];
+      new Chart(catCtx,{type:'doughnut',
+        data:{labels:data.categories.map(c=>c.category),
+          datasets:[{data:data.categories.map(c=>c.total),backgroundColor:colors,borderWidth:0,hoverOffset:4}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:8,padding:10,font:{size:10}}}}}
+      });
+      const list=document.getElementById('catList');
+      if(list) list.innerHTML=data.categories.map(c=>`
+        <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(201,168,76,.05);font-size:11px">
+          <span>${c.category}</span><span style="color:var(--gold);font-weight:700">₹${c.total.toLocaleString('en-IN',{minimumFractionDigits:0})}</span>
+        </div>`).join('');
+    }
+  });
+}
+
+initWeekChart();
+</script>
+</body>
+</html>

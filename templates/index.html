@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Gold — Digital Wallet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #C9A84C;
+            --gold-light: #F5D98A;
+            --gold-dark: #8B6914;
+            --bg: #0A0A08;
+            --bg2: #111109;
+            --bg3: #1A1A14;
+            --surface: #181810;
+            --surface2: #222218;
+            --border: rgba(201,168,76,0.18);
+            --border-hover: rgba(201,168,76,0.45);
+            --text: #E8E4D8;
+            --text-muted: #8A8470;
+            --text-dim: #5A5445;
+            --danger: #C0392B;
+            --success: #27AE60;
+            --radius: 4px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2.5rem; height: 60px;
+            background: rgba(10,10,8,0.96);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; color: var(--gold);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem; font-weight: 600; letter-spacing: 0.05em;
+        }
+        .nav-logo span { color: var(--text-muted); font-weight: 300; }
+        .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-link {
+            text-decoration: none; color: var(--text-muted);
+            font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+            transition: color 0.2s;
+        }
+        .nav-link:hover { color: var(--gold); }
+        .nav-btn {
+            padding: 7px 18px;
+            background: transparent;
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius);
+            color: var(--gold);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px; letter-spacing: 0.1em;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: var(--gold); color: var(--bg); }
+
+        /* ── FLASH ── */
+        .flash-container {
+            position: fixed; top: 70px; right: 1.5rem; z-index: 200;
+            display: flex; flex-direction: column; gap: 8px; max-width: 360px;
+        }
+        .flash {
+            padding: 12px 16px; background: var(--surface2);
+            border: 1px solid var(--border); border-left: 3px solid var(--gold);
+            border-radius: var(--radius); font-size: 12px; cursor: pointer;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(20px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 80px 2rem 5rem;
+            position: relative; overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 50% 60%, rgba(201,168,76,0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 30% 40% at 20% 20%, rgba(201,168,76,0.04) 0%, transparent 60%);
+        }
+        /* Animated grid lines */
+        .hero-bg::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 70%);
+        }
+        .hero-content { position: relative; text-align: center; max-width: 700px; }
+        .hero-eyebrow {
+            font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase;
+            color: var(--gold); margin-bottom: 1.5rem;
+            opacity: 0; animation: fadeUp 0.6s 0.2s forwards;
+        }
+        .hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3.5rem, 9vw, 6.5rem);
+            font-weight: 300; line-height: 1.05;
+            color: var(--text); margin-bottom: 1.5rem;
+            opacity: 0; animation: fadeUp 0.7s 0.35s forwards;
+        }
+        .hero-title em { font-style: italic; color: var(--gold); }
+        .hero-sub {
+            font-size: 12px; color: var(--text-muted); letter-spacing: 0.06em;
+            margin-bottom: 2.5rem; max-width: 500px; margin-left: auto; margin-right: auto;
+            line-height: 1.8;
+            opacity: 0; animation: fadeUp 0.7s 0.5s forwards;
+        }
+        .hero-actions {
+            display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+            margin-bottom: 4rem;
+            opacity: 0; animation: fadeUp 0.7s 0.65s forwards;
+        }
+        .hero-stats {
+            display: flex; gap: 3rem; justify-content: center; flex-wrap: wrap;
+            opacity: 0; animation: fadeUp 0.7s 0.8s forwards;
+            padding-top: 2.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .hero-stat-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem; font-weight: 300; color: var(--gold); line-height: 1;
+        }
+        .hero-stat-label {
+            font-size: 10px; color: var(--text-dim); letter-spacing: 0.12em;
+            text-transform: uppercase; margin-top: 3px;
+        }
+        @keyframes fadeUp {
+            from { transform: translateY(18px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+
+        /* ── BUTTONS ── */
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 13px 28px; background: var(--gold); color: var(--bg);
+            border: none; border-radius: var(--radius);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+            cursor: pointer; text-decoration: none; font-weight: 700;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,168,76,0.2); }
+        .btn-secondary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 13px 28px; background: transparent; color: var(--text);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+            cursor: pointer; text-decoration: none; transition: all 0.2s;
+        }
+        .btn-secondary:hover { border-color: var(--border-hover); color: var(--gold); }
+
+        /* ── FEATURES ── */
+        .features-section {
+            padding: 6rem 2rem; max-width: 1100px; margin: 0 auto;
+        }
+        .section-eyebrow {
+            font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+            color: var(--gold); margin-bottom: 1rem; text-align: center;
+        }
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 4vw, 3rem); font-weight: 300;
+            text-align: center; margin-bottom: 3rem; line-height: 1.2;
+        }
+        .section-title em { color: var(--gold); font-style: italic; }
+        .features-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            overflow: hidden; margin-bottom: 1px;
+        }
+        .features-grid-row2 { grid-template-columns: repeat(4, 1fr); }
+        .feature {
+            padding: 2rem 1.5rem; background: var(--bg2);
+            transition: background 0.2s; cursor: default;
+        }
+        .feature:hover { background: var(--surface); }
+        .feature-icon { font-size: 1.4rem; margin-bottom: 0.8rem; display: block; }
+        .feature-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem; font-weight: 600; color: var(--gold); margin-bottom: 0.4rem;
+        }
+        .feature-desc { font-size: 11px; color: var(--text-muted); line-height: 1.7; }
+        .feature-badge {
+            display: inline-block; margin-top: 0.8rem;
+            font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-dim); border: 1px solid var(--border);
+            padding: 2px 8px; border-radius: 2px;
+        }
+
+        /* ── TIERS ── */
+        .tiers-section { padding: 4rem 2rem; max-width: 900px; margin: 0 auto; }
+        .tiers-row {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+            margin-top: 2.5rem;
+        }
+        .tier-card {
+            padding: 1.5rem 1.2rem; text-align: center;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); min-width: 140px;
+            transition: all 0.2s;
+        }
+        .tier-card:hover { transform: translateY(-3px); border-color: var(--border-hover); }
+        .tier-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .tier-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .tier-xp { font-size: 10px; color: var(--text-dim); letter-spacing: 0.08em; }
+        .tier-bronze .tier-name { color: #cd7f32; }
+        .tier-silver .tier-name { color: #c0c0c0; }
+        .tier-gold   .tier-name { color: var(--gold); }
+        .tier-platinum .tier-name { color: #e5e4e2; }
+        .tier-diamond  .tier-name { color: #b9f2ff; }
+
+        /* ── HOW IT WORKS ── */
+        .how-section { padding: 5rem 2rem; border-top: 1px solid var(--border); }
+        .steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; max-width: 900px; margin: 2.5rem auto 0; }
+        .step { position: relative; padding-top: 1rem; }
+        .step-num {
+            font-family: 'Cormorant Garamond', serif; font-size: 3rem;
+            font-weight: 300; color: rgba(201,168,76,0.12); line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        .step h4 { font-size: 12px; font-weight: 700; margin-bottom: 0.4rem; color: var(--text); }
+        .step p  { font-size: 11px; color: var(--text-muted); line-height: 1.7; }
+
+        /* ── CTA BANNER ── */
+        .cta-banner {
+            margin: 2rem 2rem 0;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 4rem 2rem; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .cta-banner::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 50% 60% at 50% 50%, rgba(201,168,76,0.05), transparent);
+        }
+        .cta-banner h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 4vw, 3rem); font-weight: 300;
+            margin-bottom: 0.8rem; position: relative;
+        }
+        .cta-banner p { font-size: 12px; color: var(--text-muted); margin-bottom: 2rem; position: relative; }
+
+        /* ── FOOTER ── */
+        footer {
+            text-align: center; padding: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-dim); font-size: 11px; letter-spacing: 0.1em;
+            margin-top: 3rem;
+        }
+        footer span { color: var(--gold); }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(6px);
+            z-index: 500; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 2.5rem; width: min(390px, 94vw);
+            position: relative;
+            transform: scale(0.96); transition: transform 0.25s;
+        }
+        .modal-overlay.active .modal { transform: scale(1); }
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem; font-weight: 300; margin-bottom: 0.4rem;
+        }
+        .modal-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.7; }
+        .oauth-btn {
+            display: flex; align-items: center; gap: 12px; width: 100%;
+            padding: 13px 16px; margin-bottom: 10px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: var(--radius); color: var(--text);
+            font-family: 'Space Mono', monospace; font-size: 12px;
+            cursor: pointer; text-decoration: none; transition: all 0.2s;
+        }
+        .oauth-btn:hover { border-color: var(--border-hover); background: var(--bg3); }
+        .modal-close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; font-size: 1.2rem; padding: 4px; line-height: 1;
+        }
+        .modal-close:hover { color: var(--text); }
+        .modal-divider {
+            display: flex; align-items: center; gap: 1rem;
+            margin: 0.5rem 0 1rem; font-size: 10px; color: var(--text-dim);
+        }
+        .modal-divider::before, .modal-divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+
+        /* ── SCROLL REVEAL ── */
+        .reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 900px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .features-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; }
+            nav { padding: 0 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/" class="nav-logo">⬡ Liquid <span>Gold</span></a>
+    <div class="nav-right">
+        {% if current_user.is_authenticated %}
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <a href="/logout" class="nav-btn">Logout</a>
+        {% else %}
+            <a href="#features" class="nav-link">Features</a>
+            <button class="nav-btn" onclick="openModal()">Sign In</button>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="flash-container">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="flash" onclick="this.remove()">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+        <p class="hero-eyebrow">Digital Wallet · Reimagined</p>
+        <h1 class="hero-title">Your money,<br><em>liquid &amp; gold.</em></h1>
+        <p class="hero-sub">
+            Send money instantly. Set savings goals. Split bills. Track budgets.
+            Earn XP and climb tiers. All in one elegant platform.
+        </p>
+        <div class="hero-actions">
+            {% if current_user.is_authenticated %}
+                <a href="/dashboard" class="btn-primary">Go to Dashboard →</a>
+            {% else %}
+                <button class="btn-primary" onclick="openModal()">Get Started Free →</button>
+                <a href="#features" class="btn-secondary">See Features ↓</a>
+            {% endif %}
+        </div>
+        <div class="hero-stats">
+            <div>
+                <div class="hero-stat-num">₹0</div>
+                <div class="hero-stat-label">Setup cost</div>
+            </div>
+            <div>
+                <div class="hero-stat-num">12+</div>
+                <div class="hero-stat-label">Features</div>
+            </div>
+            <div>
+                <div class="hero-stat-num">5</div>
+                <div class="hero-stat-label">Tier levels</div>
+            </div>
+            <div>
+                <div class="hero-stat-num">2FA</div>
+                <div class="hero-stat-label">OAuth security</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+    <div class="reveal">
+        <p class="section-eyebrow">✦ Platform Features</p>
+        <h2 class="section-title">Everything you need,<br><em>nothing you don't.</em></h2>
+    </div>
+    <div class="features-grid reveal">
+        <div class="feature">
+            <span class="feature-icon">💸</span>
+            <div class="feature-title">Instant Transfers</div>
+            <div class="feature-desc">Send money via email or account number. Auto 0.1% fee above ₹1,000. Real-time balance.</div>
+            <span class="feature-badge">Core</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">🏦</span>
+            <div class="feature-title">Savings Goals</div>
+            <div class="feature-desc">Create multiple goals with targets, deadlines, and custom emoji. Deposit and withdraw independently.</div>
+            <span class="feature-badge">Finance</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">📊</span>
+            <div class="feature-title">Analytics</div>
+            <div class="feature-desc">30-day spending vs. income charts. Category breakdowns. Know exactly where your money goes.</div>
+            <span class="feature-badge">Insights</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">🧾</span>
+            <div class="feature-title">Split Bills</div>
+            <div class="feature-desc">Create group bills, assign amounts, notify members, and collect payments — all in-app.</div>
+            <span class="feature-badge">Social</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">📅</span>
+            <div class="feature-title">Scheduled Payments</div>
+            <div class="feature-desc">Set up weekly, monthly, or quarterly recurring payments. Automate what you always forget.</div>
+            <span class="feature-badge">Automation</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">👥</span>
+            <div class="feature-title">Contacts</div>
+            <div class="feature-desc">Save frequent recipients. Auto-added after transfers. One-click quick-send from dashboard.</div>
+            <span class="feature-badge">Social</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">💰</span>
+            <div class="feature-title">Budget Manager</div>
+            <div class="feature-desc">Six default categories with monthly limits. Live progress bars. Edit any limit anytime.</div>
+            <span class="feature-badge">Budget</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">🔔</span>
+            <div class="feature-title">Notifications</div>
+            <div class="feature-desc">Real-time alerts for every transfer, goal milestone, split bill request, and streak achievement.</div>
+            <span class="feature-badge">Alerts</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">🏆</span>
+            <div class="feature-title">XP & Tiers</div>
+            <div class="feature-desc">Earn XP for transfers, deposits, goals, and daily logins. Climb from Bronze to Diamond tier.</div>
+            <span class="feature-badge">Gamification</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">🔥</span>
+            <div class="feature-title">Login Streaks</div>
+            <div class="feature-desc">Daily login streaks earn bonus XP. 7-day streaks give a big bonus. Never miss a day.</div>
+            <span class="feature-badge">Gamification</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">🔐</span>
+            <div class="feature-title">Security Log</div>
+            <div class="feature-desc">Full audit trail of every login, transfer, and account change — with timestamps and IPs.</div>
+            <span class="feature-badge">Security</span>
+        </div>
+        <div class="feature">
+            <span class="feature-icon">💳</span>
+            <div class="feature-title">Virtual Card</div>
+            <div class="feature-desc">Your unique LG account number displayed on a beautiful virtual card with tier badge.</div>
+            <span class="feature-badge">Identity</span>
+        </div>
+    </div>
+</section>
+
+<!-- TIERS -->
+<section class="tiers-section reveal">
+    <p class="section-eyebrow">✦ Membership Tiers</p>
+    <h2 class="section-title">Earn your place <em>at the top.</em></h2>
+    <div class="tiers-row">
+        <div class="tier-card tier-bronze"><div class="tier-icon">🥉</div><div class="tier-name">Bronze</div><div class="tier-xp">0 – 199 XP</div></div>
+        <div class="tier-card tier-silver"><div class="tier-icon">🥈</div><div class="tier-name">Silver</div><div class="tier-xp">200 – 799 XP</div></div>
+        <div class="tier-card tier-gold"><div class="tier-icon">🥇</div><div class="tier-name">Gold</div><div class="tier-xp">800 – 1,999 XP</div></div>
+        <div class="tier-card tier-platinum"><div class="tier-icon">💿</div><div class="tier-name">Platinum</div><div class="tier-xp">2,000 – 4,999 XP</div></div>
+        <div class="tier-card tier-diamond"><div class="tier-icon">💎</div><div class="tier-name">Diamond</div><div class="tier-xp">5,000+ XP</div></div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section reveal">
+    <p class="section-eyebrow" style="text-align:center">✦ Get Started</p>
+    <h2 class="section-title">Up and running <em>in 60 seconds.</em></h2>
+    <div class="steps">
+        <div class="step"><div class="step-num">01</div><h4>Sign In</h4><p>Login with Google or GitHub. No passwords needed. Secure OAuth 2.0.</p></div>
+        <div class="step"><div class="step-num">02</div><h4>Get Your Account</h4><p>Receive a unique LG account number and ₹1,000 welcome bonus instantly.</p></div>
+        <div class="step"><div class="step-num">03</div><h4>Start Transacting</h4><p>Send, receive, save, and track from one beautiful dashboard.</p></div>
+        <div class="step"><div class="step-num">04</div><h4>Earn & Rise</h4><p>Collect XP, maintain streaks, hit goals and climb to Diamond tier.</p></div>
+    </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-banner reveal">
+    <h2>Ready to <em style="color:var(--gold)">elevate</em> your finances?</h2>
+    <p>Join Liquid Gold today. Free forever. No credit card required.</p>
+    {% if current_user.is_authenticated %}
+        <a href="/dashboard" class="btn-primary">Go to Dashboard →</a>
+    {% else %}
+        <button class="btn-primary" onclick="openModal()">Create Free Account →</button>
+    {% endif %}
+</div>
+
+<footer>
+    © 2025 <span>Liquid Gold</span> &nbsp;·&nbsp; Digital Wallet Platform &nbsp;·&nbsp; Built with Flask & SQLAlchemy
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <h2 class="modal-title">Sign in</h2>
+        <p class="modal-sub">Choose your preferred authentication method to access your Liquid Gold account.</p>
+        <a href="/authorize/google" class="oauth-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115Z"/>
+                <path fill="#34A853" d="M16.04 18.013c-1.09.703-2.474 1.078-4.04 1.078a7.077 7.077 0 0 1-6.723-4.823l-4.04 3.067A11.965 11.965 0 0 0 12 24c2.933 0 5.735-1.043 7.834-3l-3.793-2.987Z"/>
+                <path fill="#4A90D9" d="M19.834 21c2.195-2.048 3.62-5.096 3.62-9 0-.71-.109-1.473-.272-2.182H12v4.637h6.436c-.317 1.559-1.17 2.766-2.395 3.558L19.834 21Z"/>
+                <path fill="#FBBC05" d="M5.277 14.268A7.12 7.12 0 0 1 4.909 12c0-.782.125-1.533.357-2.235L1.24 6.65A11.934 11.934 0 0 0 0 12c0 1.92.445 3.73 1.237 5.335l4.04-3.067Z"/>
+            </svg>
+            Continue with Google
+        </a>
+        <div class="modal-divider">or</div>
+        <a href="/authorize/github" class="oauth-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+            </svg>
+            Continue with GitHub
+        </a>
+        <p style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:1.2rem;">
+            By signing in you agree to our terms of service. Your data stays private.
+        </p>
+    </div>
+</div>
+
+<script>
+function openModal()  { document.getElementById('modal').classList.add('active'); }
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Auto-dismiss flashes
+setTimeout(() => {
+    document.querySelectorAll('.flash').forEach(f => {
+        f.style.transition = 'opacity 0.4s';
+        f.style.opacity = '0';
+        setTimeout(() => f.remove(), 400);
+    });
+}, 4500);
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
